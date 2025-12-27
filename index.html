@@ -25,7 +25,7 @@
       <label for="payments">Payments (comma separated)</label>
       <input id="payments" type="text" value="5,5,5,10,20,10" />
       <label for="initialRegister" style="margin-top:10px;">Initial register (bill:count)</label>
-      <input id="initialRegister" type="text" value="5:0,10:0,20:0,50:0" />
+      <input id="initialRegister" type="text" value="5:0,10:0,20:0,50:0,100:0" />
       <div class="row" style="margin: 8px 0 4px;">
         <button class="btn secondary" id="resetBtn">Reset</button>
         <button class="btn" id="stepBtn">Step</button>
@@ -35,7 +35,7 @@
         <button class="btn secondary" id="demoC">Demo C</button>
         <span class="status" id="status">Ready</span>
       </div>
-      <div class="muted" style="font-size:12px;">Valid bills: 5, 10, 20, 50. Whitespace is ignored. Initial register uses bill:count (leave blank for zeroes).</div>
+      <div class="muted" style="font-size:12px;">Valid bills: 5, 10, 20, 50, 100. Whitespace is ignored. Initial register uses bill:count (leave blank for zeroes).</div>
     </div>
 
     <div class="card stack">
@@ -63,6 +63,7 @@
           <div class="meter"><span class="muted">$10</span><strong id="c10">0</strong></div>
           <div class="meter"><span class="muted">$20</span><strong id="c20">0</strong></div>
           <div class="meter"><span class="muted">$50</span><strong id="c50">0</strong></div>
+          <div class="meter"><span class="muted">$100</span><strong id="c100">0</strong></div>
         </div>
       </div>
       <div>
@@ -74,7 +75,7 @@
     <div class="card stack">
       <p class="panel-title">Explanation</p>
       <div class="muted" style="line-height:1.5;">
-        Price is fixed at $5. The greedy strategy prioritizes larger bills for change (20 → 10 → 5), which ensures 10+5 for $15 and favors $20s for $45 while using only one $5 when possible. Preserving $5 bills is critical: without $5s, future change becomes impossible. You can now seed the register using the bill:count field; if left blank it starts empty. Customers are processed in order.
+        Price is fixed at $5. The greedy strategy prioritizes larger bills for change (50 → 20 → 10 → 5), which ensures 10+5 for $15 and favors $20s for $45 while using only one $5 when possible. Preserving $5 bills is critical: without $5s, future change becomes impossible. You can now seed the register using the bill:count field; if left blank it starts empty. Customers are processed in order.
       </div>
     </div>
   </div>

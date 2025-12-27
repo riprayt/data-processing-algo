@@ -1,15 +1,15 @@
 // Lemonade Stand Web Demo
-// Core semantics: price=5, bills in {5,10,20,50}.
+// Core semantics: price=5, bills in {5,10,20,50,100}.
 // Change is made strictly from existing register before adding the incoming bill.
-// Greedy largest-first (20 -> 10 -> 5) ensures 10+5 over 5+5+5 for 15, and uses only one 5 when making 45.
+// Greedy largest-first (50 -> 20 -> 10 -> 5) ensures 10+5 over 5+5+5 for 15, and uses only one 5 when making 45.
 // Preserving $5 bills is crucial: without them, no future change is possible.
 
 const PRICE = 5;
-const ALLOWED = new Set([5, 10, 20, 50]);
+const ALLOWED = new Set([5, 10, 20, 50, 100]);
 
 // Utilities
-function cloneRegister(r) { return { 5: r[5], 10: r[10], 20: r[20], 50: r[50] }; }
-function emptyRegister() { return { 5: 0, 10: 0, 20: 0, 50: 0 }; }
+function cloneRegister(r) { return { 5: r[5], 10: r[10], 20: r[20], 50: r[50], 100: r[100] }; }
+function emptyRegister() { return { 5: 0, 10: 0, 20: 0, 50: 0, 100: 0 }; }
 
 // Make change using largest-first greedy order
 function makeChangeGreedy(changeDue, reg) {
@@ -17,7 +17,7 @@ function makeChangeGreedy(changeDue, reg) {
   const work = cloneRegister(reg);
   const given = [];
   let remaining = changeDue;
-  const order = [20, 10, 5];
+  const order = [50, 20, 10, 5];
   for (const bill of order) {
     while (remaining >= bill && work[bill] > 0) {
       remaining -= bill;
@@ -46,6 +46,7 @@ const els = {
     10: document.getElementById('c10'),
     20: document.getElementById('c20'),
     50: document.getElementById('c50'),
+    100: document.getElementById('c100'),
   },
   buttons: {
     reset: document.getElementById('resetBtn'),
@@ -98,7 +99,7 @@ function setStatus(text, tone = 'neutral') {
 function writeLogEntry(step) {
   const after = step.registerAfter;
   const billsStr = step.billsGiven ? `[${step.billsGiven.join(',')}]` : '[]';
-  const line = `#${step.i} | pay=${step.pay} | due=${step.changeDue} | give=${billsStr} | reg(after)=5:${after[5]} 10:${after[10]} 20:${after[20]} 50:${after[50]}`;
+  const line = `#${step.i} | pay=${step.pay} | due=${step.changeDue} | give=${billsStr} | reg(after)=5:${after[5]} 10:${after[10]} 20:${after[20]} 50:${after[50]} 100:${after[100]}`;
   const div = document.createElement('div');
   div.className = 'log-entry';
   if (!step.billsGiven) div.classList.add('danger'); else div.classList.add('muted');
@@ -112,6 +113,7 @@ function updateRegisterUI() {
   els.counts[10].textContent = uiRegister[10];
   els.counts[20].textContent = uiRegister[20];
   els.counts[50].textContent = uiRegister[50];
+  els.counts[100].textContent = uiRegister[100];
 }
 
 function updateCurrentUI(step) {
@@ -141,7 +143,7 @@ function resetUI() {
   const parsed = parseInput();
   const initialReg = parseRegisterInput();
   if (!parsed) {
-    setStatus('Invalid payments: use 5,10,20,50', 'bad');
+    setStatus('Invalid payments: use 5,10,20,50,100', 'bad');
     els.result.textContent = '-';
     els.failIndex.textContent = '-';
     els.failPayment.textContent = '-';
@@ -154,7 +156,7 @@ function resetUI() {
     return;
   }
   if (!initialReg) {
-    setStatus('Invalid initial register: use bill:count with 5,10,20,50', 'bad');
+    setStatus('Invalid initial register: use bill:count with 5,10,20,50,100', 'bad');
     els.result.textContent = '-';
     els.failIndex.textContent = '-';
     els.failPayment.textContent = '-';

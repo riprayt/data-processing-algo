@@ -108,7 +108,7 @@ input[type="text"] {
 .status { font-size: 14px; color: var(--muted); }
 .status.good { color: var(--success); }
 .status.bad { color: var(--danger); }
-.grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+.grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; }
 .meter { background: rgba(255,255,255,0.04); padding: 12px; border-radius: 8px; text-align: center; }
 .meter strong { display: block; font-size: 18px; }
 .log {

@@ -1,13 +1,13 @@
 # Lemonade Stand Greedy Algorithm Web Demo
 
 **Summary**
-- Simulates serving lemonade at $5 with payments in {5, 10, 20, 50}; you may now seed the register via `bill:count` pairs or leave it empty for zeros.
+- Simulates serving lemonade at $5 with payments in {5, 10, 20, 50, 100}; you may now seed the register via `bill:count` pairs or leave it empty for zeros.
 - Greedy rule: make change using largest bills first (20 → 10 → 5) using only what is already in the register.
 - Succeeds if every customer can be served; otherwise reports the first failing customer index and payment.
 - UI shows status, current transaction, register counts, and a step-by-step log driven by a simulation trace.
 
 ## Problem Definition
-- **Input:** Sequence of payments (each must be 5, 10, 20, or 50), fixed price 5, optional initial register given as `bill:count` (defaults to zero counts when left blank).
+- **Input:** Sequence of payments (each must be 5, 10, 20, 50, or 100), fixed price 5, optional initial register given as `bill:count` (defaults to zero counts when left blank).
 - **Constraint:** Change must be constructed from current register contents only; incoming bill is unavailable until change is given.
 - **Success:** All customers served in order. **Failure:** At customer *i*, exact change cannot be made with available bills (report *i* and payment value).
 - Focus is feasibility under limited inventory—not minimizing number of coins; greedy is a pragmatic cashier policy for this setting.
@@ -15,14 +15,14 @@
 ## Core Algorithm Logic
 Step per customer (before any UI details):
 - Compute `changeDue = pay − 5`.
-- Attempt to make exact change from current register using greedy order 20 → 10 → 5.
+- Attempt to make exact change from current register using greedy order 50 → 20 → 10 → 5.
 - If change fails, stop and report fail index and payment.
 - If change succeeds, remove returned bills from register, then add the incoming bill.
 - **Key pitfall avoided:** do **not** add the incoming bill before giving change; doing so would misrepresent feasibility.
 
 **Pseudo-code sketch**
 ```text
-reg = {5:0,10:0,20:0,50:0}
+reg = {5:0,10:0,20:0,50:0,100:0}
 for i, pay in enumerate(payments, 1):
     change = pay - 5
     bills = greedy_make_change(change, reg)
@@ -41,7 +41,7 @@ return PASS
 - [index.html](index.html): page layout, panels, buttons (Reset/Step/Run, Demo A/B/C), static explanation, and fields for payments plus optional initial register `bill:count`.
 - [styles.css](styles.css): visual theme, responsive grid, log and meter styling.
 - [app.js](app.js):
-  - Parses and validates comma-separated payments against allowed set {5,10,20,50}; parses optional initial register as `bill:count` with defaults to zero.
+  - Parses and validates comma-separated payments against allowed set {5,10,20,50,100}; parses optional initial register as `bill:count` with defaults to zero.
   - Simulation: `makeChangeGreedy` (largest-first), `processPaymentStep` builds per-customer trace entries with before/after registers.
   - UI state machine: Reset initializes state (with seeded register when provided), Step advances one customer, Run iterates until halt; halts on failure or completion.
   - Rendering: status/result panel, current transaction pointer, register counts, and append-only log.
