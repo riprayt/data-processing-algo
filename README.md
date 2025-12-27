@@ -1,23 +1,69 @@
 # Lemonade Stand Greedy Change
 
-A tiny educational project that compares two cash-handling strategies for a lemonade stand. Each lemonade costs 5. Customers pay with a single bill from {5, 10, 20, 50}. You can only give change using bills already collected, and the goal is to decide whether every customer can be served in order.
+An educational web demo showing a cashier simulation for a lemonade stand. Each lemonade costs $5. Customers pay with a single bill from {5, 10, 20, 50}. The cashier can only give change using bills already collected in the register, and must process customers in order.
 
-## Greedy Idea and Invariant
-- The critical resource is the 5-dollar bill. Without 5s, no later change is possible, so every decision must protect them when feasible.
-- For a 20-dollar payment (change 15), the locally greedy rule is to give 10 + 5 when available instead of three 5s. It satisfies the current customer while conserving 5s for future customers, improving overall feasibility.
-- This is not the general coin-change optimization problem; it is a cashier feasibility simulation with limited inventory and a fixed price.
+## Greedy Strategy
 
-## Strategies
-- **Good greedy**: Follows the 10+5 preference for 15 change, and for 45 change (from a 50) it tries larger bills first while using only one 5.
-- **Bad greedy (small-first)**: Always tries to spend the smallest bills it has, which often exhausts 5s too early.
+The demo uses a **largest-first greedy algorithm** for making change:
+- Bills are prioritized in order: 20 → 10 → 5
+- For $15 change (from a $20 payment), this gives 10 + 5 instead of three $5 bills
+- For $45 change (from a $50 payment), this uses $20s while consuming only one $5 when possible
+- Preserving $5 bills is critical: without them, no future change is possible
 
-Each function returns `(ok, fail_index, trace)` where `trace` records, per customer, the payment, change due, bills given, and register contents before/after.
+This is not the general coin-change optimization problem; it's a cashier feasibility simulation with limited inventory and a fixed price of $5.
 
-## Running the CLI demo
+## Semantics
+
+- **Price**: Fixed at $5
+- **Valid bills**: 5, 10, 20, 50
+- **Starting register**: Empty
+- **Change-making**: Bills are removed from the register BEFORE adding the incoming payment
+- **Processing**: Customers are served in order; if exact change cannot be made, the simulation fails at that customer
+
+## Web Demo
+
+Open [web_demo/index.html](web_demo/index.html) directly in your browser (no build step or dependencies). 
+
+Enter payments as a comma-separated list, then use:
+- **Reset**: Clear state and start over
+- **Step**: Process one customer at a time
+- **Run**: Process all remaining customers
+- **Demo A/B/C**: Load preset scenarios
+  - Demo A: `5,5,5,10,20,10` (PASS)
+  - Demo B: `10` (FAIL - no change available)
+  - Demo C: `5,5,5,10,5,10,20,5,10,50` (PASS)
+
+The panel displays:
+- **Status**: PASS/FAIL, failure index (1-based), and current pointer
+- **Current transaction**: Payment, change due, bills given
+- **Register visualization**: Counts of 5/10/20/50 bills
+- **Log**: Scrollable history with one line per processed customer
+
+### Local Development
+
+**Option 1**: Double-click `web_demo/index.html` to open directly in your browser.
+
+**Option 2**: Serve with a simple static server:
 ```bash
-python demo_cli.py
+cd web_demo
+python3 -m http.server 8000
+# Open http://localhost:8000/index.html
 ```
-This prints three scenarios and shows PASS/FAIL along with a step-by-step trace for both strategies.
 
-## Web demo
-Open `web_demo/index.html` directly in your browser (no build step or dependencies). Enter payments as a comma-separated list, choose the strategy, then use Reset, Step, Run, or Run to failure to watch the simulation. The panel displays the current customer pointer, change due, bills dispensed, register counts for 5/10/20/50, and a scrolling log of steps.
+### Vercel Deployment
+
+The web demo can be deployed as a static site on Vercel:
+
+**Dashboard setup**:
+- Import repository
+- Root Directory: `web_demo`
+- Framework Preset: Other
+- Build Command: (leave empty)
+- Output Directory: `.`
+
+**CLI deployment**:
+```bash
+npm i -g vercel
+cd web_demo
+vercel --prod
+```
