@@ -22,7 +22,7 @@ This is not the general coin-change optimization problem; it's a cashier feasibi
 
 ## Web Demo
 
-Open [web_demo/index.html](web_demo/index.html) directly in your browser (no build step or dependencies). 
+Open [index.html](index.html) directly in your browser (no build step or dependencies). 
 
 Enter payments as a comma-separated list, then use:
 - **Reset**: Clear state and start over
@@ -41,13 +41,12 @@ The panel displays:
 
 ### Local Development
 
-**Option 1**: Double-click `web_demo/index.html` to open directly in your browser.
+**Option 1**: Double-click `index.html` to open directly in your browser.
 
 **Option 2**: Serve with a simple static server:
 ```bash
-cd web_demo
 python3 -m http.server 8000
-# Open http://localhost:8000/index.html
+# Open http://localhost:8000
 ```
 
 ### Vercel Deployment
@@ -56,14 +55,15 @@ The web demo can be deployed as a static site on Vercel:
 
 **Dashboard setup**:
 - Import repository
-- Root Directory: `web_demo`
+- Root Directory: `.` (leave empty or set to root)
 - Framework Preset: Other
 - Build Command: (leave empty)
-- Output Directory: `.`
+- Output Directory: `.` (leave empty or set to root)
 
 **CLI deployment**:
 ```bash
 npm i -g vercel
-cd web_demo
 vercel --prod
 ```
+
+The `vercel.json` configuration ensures all routes serve `index.html` properly (no 404 on refresh).
