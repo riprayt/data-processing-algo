@@ -1,0 +1,351 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lemonade Stand Greedy Simulator</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --accent: #f59e0b;
+      --text: #e5e7eb;
+      --muted: #94a3b8;
+      --danger: #ef4444;
+      --success: #22c55e;
+      --card: #1f2937;
+      --shadow: 0 10px 30px rgba(0,0,0,0.35);
+      --radius: 12px;
+      --mono: "Courier New", "SFMono-Regular", "Menlo", monospace;
+      --display: "Gill Sans", "Trebuchet MS", "Segoe UI", sans-serif;
+    }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: radial-gradient(circle at 20% 20%, #1e293b, #0f172a 55%);
+      color: var(--text);
+      font-family: var(--display);
+      display: flex;
+      justify-content: center;
+      padding: 40px 16px;
+    }
+    .shell {
+      width: min(1100px, 100%);
+      background: var(--panel);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 28px;
+      display: grid;
+      gap: 16px;
+      grid-template-columns: 3fr 2fr;
+    }
+    header {
+      grid-column: 1 / -1;
+      display: flex;
+      justify-content: space-between;
+      align-items: baseline;
+    }
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 0.5px;
+    }
+    .tag {
+      background: rgba(245, 158, 11, 0.15);
+      color: var(--accent);
+      padding: 6px 10px;
+      border-radius: 999px;
+      font-size: 12px;
+      letter-spacing: 0.4px;
+    }
+    .card {
+      background: var(--card);
+      border: 1px solid rgba(255,255,255,0.05);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    label { display: block; margin-bottom: 4px; font-size: 12px; color: var(--muted); }
+    input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border-radius: 8px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.04);
+      color: var(--text);
+      font-family: var(--mono);
+    }
+    .row { display: flex; gap: 12px; flex-wrap: wrap; align-items: center; }
+    .btn {
+      background: var(--accent);
+      color: #111;
+      border: none;
+      padding: 10px 14px;
+      border-radius: 8px;
+      cursor: pointer;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      transition: transform 0.1s ease, box-shadow 0.1s ease;
+      box-shadow: 0 6px 14px rgba(245, 158, 11, 0.35);
+    }
+    .btn:active { transform: translateY(1px); box-shadow: 0 2px 8px rgba(0,0,0,0.25); }
+    .btn.secondary { background: #1f2937; color: var(--text); box-shadow: 0 0 0 rgba(0,0,0,0); border: 1px solid rgba(255,255,255,0.08); }
+    .radio-group { display: flex; gap: 12px; margin: 8px 0 12px; }
+    .pill { padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,0.06); }
+    .status { font-size: 14px; color: var(--muted); }
+    .status.good { color: var(--success); }
+    .status.bad { color: var(--danger); }
+    .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+    .meter { background: rgba(255,255,255,0.04); padding: 12px; border-radius: 8px; text-align: center; }
+    .meter strong { display: block; font-size: 18px; }
+    .log {
+      background: rgba(0,0,0,0.35);
+      border-radius: 10px;
+      padding: 12px;
+      height: 280px;
+      overflow: auto;
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .log-entry { margin-bottom: 6px; line-height: 1.4; }
+    .log-entry.danger { color: var(--danger); }
+    .muted { color: var(--muted); }
+    .panel-title { margin: 0 0 8px; font-size: 14px; letter-spacing: 0.3px; color: var(--muted); }
+    .stack { display: flex; flex-direction: column; gap: 8px; }
+    @media (max-width: 960px) { .shell { grid-template-columns: 1fr; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header>
+      <h1>Lemonade Greedy Cashier</h1>
+      <div class="tag">Greedy vs Small-first</div>
+    </header>
+
+    <div class="card">
+      <label for="payments">Payments (comma separated)</label>
+      <input id="payments" type="text" value="5,5,5,10,20,10" />
+      <div class="radio-group">
+        <label class="pill"><input type="radio" name="strategy" value="good" checked> Good greedy</label>
+        <label class="pill"><input type="radio" name="strategy" value="bad"> Bad (small-first)</label>
+      </div>
+      <div class="row" style="margin: 8px 0 4px;">
+        <button class="btn secondary" id="resetBtn">Reset</button>
+        <button class="btn" id="stepBtn">Step</button>
+        <button class="btn" id="runBtn">Run</button>
+        <button class="btn" id="failBtn">Run to failure</button>
+        <span class="status" id="status">Ready</span>
+      </div>
+      <div class="muted" style="font-size:12px;">Valid bills: 5, 10, 20, 50. Whitespace is ignored.</div>
+    </div>
+
+    <div class="card stack">
+      <div>
+        <p class="panel-title">Current state</p>
+        <div class="row" style="justify-content: space-between;">
+          <div>Customer pointer: <strong id="pointer">0</strong></div>
+          <div>Change due: <strong id="changeDue">-</strong></div>
+          <div>Bills given: <strong id="billsGiven">-</strong></div>
+        </div>
+      </div>
+      <div>
+        <p class="panel-title">Register (counts)</p>
+        <div class="grid">
+          <div class="meter"><span class="muted">$5</span><strong id="c5">0</strong></div>
+          <div class="meter"><span class="muted">$10</span><strong id="c10">0</strong></div>
+          <div class="meter"><span class="muted">$20</span><strong id="c20">0</strong></div>
+          <div class="meter"><span class="muted">$50</span><strong id="c50">0</strong></div>
+        </div>
+      </div>
+      <div>
+        <p class="panel-title">Log</p>
+        <div class="log" id="log"></div>
+      </div>
+    </div>
+
+    <div class="card stack">
+      <p class="panel-title">Explanation</p>
+      <div class="muted" style="line-height:1.5;">
+        Price is fixed at $5. The good strategy prefers 10+5 for $15 change and prioritizes larger bills for $45 change while using only one $5. The bad strategy burns the smallest bills first. Observe how preserving $5 bills is critical for serving more customers.
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const PRICE = 5;
+    const allowed = new Set([5, 10, 20, 50]);
+    let payments = [];
+    let pointer = 0;
+    let halted = false;
+    let register = {5: 0, 10: 0, 20: 0, 50: 0};
+
+    const els = {
+      payments: document.getElementById('payments'),
+      pointer: document.getElementById('pointer'),
+      changeDue: document.getElementById('changeDue'),
+      billsGiven: document.getElementById('billsGiven'),
+      status: document.getElementById('status'),
+      log: document.getElementById('log'),
+      counts: {
+        5: document.getElementById('c5'),
+        10: document.getElementById('c10'),
+        20: document.getElementById('c20'),
+        50: document.getElementById('c50'),
+      }
+    };
+
+    function snapshot(obj) {
+      return {5: obj[5], 10: obj[10], 20: obj[20], 50: obj[50]};
+    }
+
+    function parseInput() {
+      const raw = els.payments.value.split(',').map(p => p.trim()).filter(Boolean);
+      const parsed = [];
+      for (const token of raw) {
+        const num = Number(token);
+        if (!allowed.has(num)) return null;
+        parsed.push(num);
+      }
+      return parsed;
+    }
+
+    function goodChange(change, reg) {
+      if (change === 0) return [];
+      if (change === 5) return reg[5] >= 1 ? [5] : null;
+      if (change === 15) {
+        if (reg[10] >= 1 && reg[5] >= 1) return [10, 5];
+        if (reg[5] >= 3) return [5, 5, 5];
+        return null;
+      }
+      if (change === 45) {
+        const combos = [
+          [20, 20, 5],
+          [20, 10, 10, 5],
+          [10, 10, 10, 10, 5],
+        ];
+        for (const combo of combos) {
+          const test = snapshot(reg);
+          let ok = true;
+          for (const bill of combo) {
+            test[bill] -= 1;
+            if (test[bill] < 0) { ok = false; break; }
+          }
+          if (ok) return combo;
+        }
+        return null;
+      }
+      return null;
+    }
+
+    function badChange(change, reg) {
+      if (change === 0) return [];
+      let remaining = change;
+      const given = [];
+      const work = snapshot(reg);
+      for (const bill of [5, 10, 20, 50]) {
+        while (remaining >= bill && work[bill] > 0) {
+          remaining -= bill;
+          work[bill] -= 1;
+          given.push(bill);
+        }
+        if (remaining === 0) break;
+      }
+      return remaining === 0 ? given : null;
+    }
+
+    function giveChange(payment, strategy) {
+      const changeDue = payment - PRICE;
+      const before = snapshot(register);
+      const chooser = strategy === 'good' ? goodChange : badChange;
+      const bills = chooser(changeDue, register);
+      if (bills === null) {
+        return { ok: false, changeDue, billsGiven: null, before, after: before };
+      }
+      for (const bill of bills) {
+        register[bill] -= 1;
+      }
+      register[payment] += 1;
+      return { ok: true, changeDue, billsGiven: bills, before, after: snapshot(register) };
+    }
+
+    function logLine(text, tone = 'muted') {
+      const div = document.createElement('div');
+      div.className = 'log-entry';
+      if (tone === 'muted') div.classList.add('muted');
+      if (tone === 'danger') div.classList.add('danger');
+      div.textContent = text;
+      els.log.appendChild(div);
+      els.log.scrollTop = els.log.scrollHeight;
+    }
+
+    function updateUI(stepResult) {
+      els.pointer.textContent = pointer;
+      els.counts[5].textContent = register[5];
+      els.counts[10].textContent = register[10];
+      els.counts[20].textContent = register[20];
+      els.counts[50].textContent = register[50];
+      els.changeDue.textContent = stepResult ? stepResult.changeDue : '-';
+      els.billsGiven.textContent = stepResult && stepResult.billsGiven ? stepResult.billsGiven.join(',') : '-';
+    }
+
+    function reset() {
+      const parsed = parseInput();
+      if (!parsed || parsed.length === 0) {
+        els.status.textContent = 'Invalid input: use 5,10,20,50';
+        els.status.className = 'status bad';
+        return;
+      }
+      payments = parsed;
+      register = {5: 0, 10: 0, 20: 0, 50: 0};
+      pointer = 0;
+      halted = false;
+      els.log.innerHTML = '';
+      els.status.textContent = 'Ready';
+      els.status.className = 'status';
+      updateUI();
+    }
+
+    function step() {
+      if (halted) return;
+      if (pointer >= payments.length) {
+        els.status.textContent = 'All customers served';
+        els.status.className = 'status good';
+        return;
+      }
+      const strategy = document.querySelector('input[name="strategy"]:checked').value;
+      const payment = payments[pointer];
+      const result = giveChange(payment, strategy);
+      if (!result.ok) {
+        halted = true;
+        els.status.textContent = `FAIL at customer ${pointer}`;
+        els.status.className = 'status bad';
+        logLine(`#${pointer} paid ${payment} → need ${result.changeDue}, cannot make change`, 'danger');
+        updateUI(result);
+        return;
+      }
+      logLine(`#${pointer} paid ${payment} → change ${result.changeDue} using [${result.billsGiven.join(',')}]`);
+      pointer += 1;
+      updateUI(result);
+      if (pointer === payments.length) {
+        halted = true;
+        els.status.textContent = 'PASS - everyone served';
+        els.status.className = 'status good';
+      }
+    }
+
+    function run(stopOnFailure) {
+      while (!halted && pointer < payments.length) {
+        step();
+        if (stopOnFailure && halted) break;
+      }
+    }
+
+    document.getElementById('resetBtn').onclick = reset;
+    document.getElementById('stepBtn').onclick = () => step();
+    document.getElementById('runBtn').onclick = () => run(false);
+    document.getElementById('failBtn').onclick = () => run(true);
+
+    reset();
+  </script>
+</body>
+</html>
