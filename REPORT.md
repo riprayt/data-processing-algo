@@ -1,13 +1,13 @@
 # Lemonade Stand Greedy Algorithm Web Demo
 
-**Summary (3–5 lines)**
-- Simulates serving lemonade at $5 with payments in {5, 10, 20, 50}; register starts empty and customers are served in order.
+**Summary**
+- Simulates serving lemonade at $5 with payments in {5, 10, 20, 50}; you may now seed the register via `bill:count` pairs or leave it empty for zeros.
 - Greedy rule: make change using largest bills first (20 → 10 → 5) using only what is already in the register.
 - Succeeds if every customer can be served; otherwise reports the first failing customer index and payment.
 - UI shows status, current transaction, register counts, and a step-by-step log driven by a simulation trace.
 
 ## Problem Definition
-- **Input:** Sequence of payments (each must be 5, 10, 20, or 50), fixed price 5, empty initial register.
+- **Input:** Sequence of payments (each must be 5, 10, 20, or 50), fixed price 5, optional initial register given as `bill:count` (defaults to zero counts when left blank).
 - **Constraint:** Change must be constructed from current register contents only; incoming bill is unavailable until change is given.
 - **Success:** All customers served in order. **Failure:** At customer *i*, exact change cannot be made with available bills (report *i* and payment value).
 - Focus is feasibility under limited inventory—not minimizing number of coins; greedy is a pragmatic cashier policy for this setting.
@@ -38,12 +38,12 @@ return PASS
 - This is a practical greedy heuristic for the constrained cashier variant; we do not claim a universal optimality proof for all denominations or policies.
 
 ## Code Architecture (files → responsibilities)
-- [index.html](index.html): page layout, panels, buttons (Reset/Step/Run, Demo A/B/C), static explanation.
+- [index.html](index.html): page layout, panels, buttons (Reset/Step/Run, Demo A/B/C), static explanation, and fields for payments plus optional initial register `bill:count`.
 - [styles.css](styles.css): visual theme, responsive grid, log and meter styling.
 - [app.js](app.js):
-  - Parses and validates comma-separated payments against allowed set {5,10,20,50}; shows error on invalid input.
+  - Parses and validates comma-separated payments against allowed set {5,10,20,50}; parses optional initial register as `bill:count` with defaults to zero.
   - Simulation: `makeChangeGreedy` (largest-first), `processPaymentStep` builds per-customer trace entries with before/after registers.
-  - UI state machine: Reset initializes state, Step advances one customer, Run iterates until halt; halts on failure or completion.
+  - UI state machine: Reset initializes state (with seeded register when provided), Step advances one customer, Run iterates until halt; halts on failure or completion.
   - Rendering: status/result panel, current transaction pointer, register counts, and append-only log.
 - Trace entry shape: `(i, pay, changeDue, billsGiven, registerBefore, registerAfter)`; the UI log and stepper render directly from this trace data.
 
