@@ -31,6 +31,7 @@ function makeChangeGreedy(changeDue, reg) {
 // --- UI State and Controls ---
 const els = {
   payments: document.getElementById('payments'),
+  initialRegister: document.getElementById('initialRegister'),
   statusText: document.getElementById('status'),
   result: document.getElementById('result'),
   failIndex: document.getElementById('failIndex'),
@@ -71,6 +72,22 @@ function parseInput() {
     parsed.push(num);
   }
   return parsed;
+}
+
+function parseRegisterInput() {
+  const raw = els.initialRegister.value.trim();
+  if (raw === '') return emptyRegister();
+  const reg = emptyRegister();
+  const tokens = raw.split(',').map(s => s.trim()).filter(Boolean);
+  for (const token of tokens) {
+    const [billStr, countStr] = token.split(':').map(s => s && s.trim());
+    if (!billStr || countStr === undefined) return null;
+    const bill = Number(billStr);
+    const count = Number(countStr);
+    if (!ALLOWED.has(bill) || !Number.isInteger(count) || count < 0) return null;
+    reg[bill] = count;
+  }
+  return reg;
 }
 
 function setStatus(text, tone = 'neutral') {
@@ -122,8 +139,22 @@ function processPaymentStep(pay) {
 
 function resetUI() {
   const parsed = parseInput();
+  const initialReg = parseRegisterInput();
   if (!parsed) {
-    setStatus('Invalid input: use 5,10,20,50', 'bad');
+    setStatus('Invalid payments: use 5,10,20,50', 'bad');
+    els.result.textContent = '-';
+    els.failIndex.textContent = '-';
+    els.failPayment.textContent = '-';
+    uiPayments = [];
+    uiPointer = 0;
+    uiHalted = true;
+    uiRegister = emptyRegister();
+    els.log.innerHTML = '';
+    updateCurrentUI(null);
+    return;
+  }
+  if (!initialReg) {
+    setStatus('Invalid initial register: use bill:count with 5,10,20,50', 'bad');
     els.result.textContent = '-';
     els.failIndex.textContent = '-';
     els.failPayment.textContent = '-';
@@ -138,7 +169,7 @@ function resetUI() {
   uiPayments = parsed;
   uiPointer = 0;
   uiHalted = false;
-  uiRegister = emptyRegister();
+  uiRegister = initialReg;
   els.log.innerHTML = '';
   setStatus('Ready');
   els.result.textContent = '-';
