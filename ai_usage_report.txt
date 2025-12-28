@@ -1,0 +1,10 @@
+How We Used AI Gracefully
+
+Step 1: We wrote the core algorithm in Python ourselves. Basic and clear logic for the lemonade stand problem.
+Step 2: We asked AI to translate the same Python code to JavaScript for a web app. We gave it the exact requirements and logic to preserve.
+Step 3: We tested both versions side by side with the same demo inputs (A, B, C) and compared outputs. They matched perfectly.
+Step 4: We asked AI to build the UI panels and buttons to visualize the algorithm. Again, we tested to make sure it worked the same way.
+
+Why This Is Good: AI was a tool to convert and build UI, not to figure out the algorithm. We owned the logic, validated the results, and kept control of correctness. AI sped things up without replacing understanding.
+
+Human First, AI as Assistant.
